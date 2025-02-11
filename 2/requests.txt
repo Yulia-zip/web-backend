@@ -1,0 +1,46 @@
+telnet u68770.kubsu-dev.ru 80
+
+//1
+GET / HTTP/1.0
+Host: u68770.kubsu-dev.ru
+
+//2
+GET /web-backend/1/ HTTP/1.1
+Host: u68770.kubsu-dev.ru
+Connection: close
+
+//3
+HEAD /web-backend/2/files/file.tar.gz HTTP/1.1
+Host: u68770.kubsu-dev.ru
+Connection: close
+
+//4
+HEAD /web-backend/2/files/image.png HTTP/1.1
+Host: u68770.kubsu-dev.ru
+Connection: close
+
+//5
+POST /web-backend/2/files/index.php HTTP/1.1
+Host: u68770.kubsu-dev.ru
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 9
+
+comment=5
+
+
+
+//6
+GET /web-backend/2/files/file.tar.gz HTTP/1.1
+Host: u68770.kubsu-dev.ru
+Range: bytes=0-99
+Connection: close
+
+//7
+HEAD /web-backend/2/files/index.php HTTP/1.1
+Host: u68770.kubsu-dev.ru
+Connection: close
+
+
+
+
+
