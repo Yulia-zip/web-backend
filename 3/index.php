@@ -95,11 +95,13 @@ if (isset($_POST['biograf'])) {
 }
 
 if (isset($_POST['agree']) && $_POST['agree'] === 'yes') {
+    $sogl = ($_POST['agree']) ? 1 : 0; 
     echo "С контрактом ознакомлен(а)";
 } else {
     echo 'Подтвердите ознакомление с контрактом.';
     $errors = TRUE;
 }
+
 if ($errors) {
   exit();
 }
@@ -110,8 +112,8 @@ $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
   [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]); 
 
   try {
-    $stmt = $db->prepare("INSERT INTO form (name_fio, phone, email,date_r, gender, biograf) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$user_name, $user_phone, $email, $dataBir, $gender, $biog]);
+    $stmt = $db->prepare("INSERT INTO form (name_fio, phone, email,date_r, gender, biograf,contract_accepted ) VALUES (?, ?, ?, ?, ?, ?,?)");
+    $stmt->execute([$user_name, $user_phone, $email, $dataBir, $gender, $biog,$sogl]);
 
     $form_id = $db->lastInsertId();
 
