@@ -106,7 +106,7 @@ if ($errors) {
 
 $user = 'u68770'; 
 $pass = '4643907'; 
-$db = new PDO('mysql:host=localhost;dbname=test', $user, $pass,
+$db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
   [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]); 
 
   try {
