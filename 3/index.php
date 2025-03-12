@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 }
 $errors = FALSE;
 
-if (isset($_POST['user-name'])) {
-    $user_name = trim($_POST['user-name']);
+if (isset($_POST['user-fio'])) {
+    $user_name = trim($_POST['user-fio']);
     if (!empty($user_name) && preg_match("/^[\p{L} ]+$/u", $user_name) && strlen($user_name) <= 150) {
         echo "FIO is valid";
     } else {
@@ -23,8 +23,8 @@ if (isset($_POST['user-name'])) {
     $errors = TRUE;
 }
 
-if (isset($_POST['user_phone'])) {
-    $user_phone = $_POST['user_phone'];
+if (isset($_POST['user-phone'])) {
+    $user_phone = $_POST['user-phone'];
     if (preg_match("/^[1-9]\d{10}$/", $user_phone)) {
         echo "PHONE is valid";
     } else {
