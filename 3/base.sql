@@ -15,8 +15,8 @@ CREATE TABLE lang (
 );
 
 CREATE TABLE lang_check (
-    check_id INT(10) UNSIGNED NOT NULL,
-    language_id INT(10) UNSIGNED NOT NULL,
+    check_id INT UNSIGNED NOT NULL,
+    language_id INT UNSIGNED NOT NULL,
     PRIMARY KEY (check_id, language_id),
     FOREIGN KEY (check_id) REFERENCES form(id),
     FOREIGN KEY (language_id) REFERENCES lang(id)
