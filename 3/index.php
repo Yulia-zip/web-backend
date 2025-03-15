@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
+include('form.php');
 $errors = FALSE;
 $errorsMessages=[];
 $successMessage = '';
@@ -114,5 +115,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo 'Ошибка: ' . $e->getMessage();
         exit();
     }
-    include 'form.php'; 
 }
