@@ -59,7 +59,7 @@ if (isset($_POST['data'])) {
 
 if (isset($_POST['gender'])) {
     $gender = $_POST['gender'];
-    if ($gender !== 'male' || $gender !== 'female') {
+    if ($gender !== 'male' && $gender !== 'female') {
         $errorMessages[] = "Некорректный выбор пола.<br>";
         $errors = TRUE;
     }
