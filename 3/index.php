@@ -118,6 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
         $successMessage = 'Спасибо, результаты сохранены.';
+        echo $successMessage;
     }catch (PDOException $e) {
         echo 'Ошибка: ' . $e->getMessage();
         exit();
