@@ -8,110 +8,103 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
   include('form.php');
   exit();
 }
+
 $errors = FALSE;
+$errorsMessages=[];
 
 if (isset($_POST['user-fio'])) {
     $user_name = trim($_POST['user-fio']);
-    if (!empty($user_name) && preg_match("/^[\p{L} ]+$/u", $user_name) && strlen($user_name) <= 150) {
-        echo "FIO is valid";
-    } else {
-        echo "FIO is not valid";
+    if (empty($user_name) && !preg_match("/^[\p{L} ]+$/u", $user_name) && strlen($user_name) >150) {
+        $errorMessages[] = 'Неверная запись ФИО <br>';
         $errors = TRUE;
     }
 } else {
-    echo '<font color="red">"Укажите ФИО."</font>';
+    $errorMessages[] = "Укажите ФИО.<br>";
     $errors = TRUE;
 }
 
 if (isset($_POST['user-phone'])) {
     $user_phone = $_POST['user-phone'];
-    if (preg_match("/^[1-9]\d{10}$/", $user_phone)) {
-        echo "PHONE is valid";
-    } else {
-        echo "PHONE is not valid";
+    if (!preg_match("/^[1-9]\d{10}$/", $user_phone)) {
+        $errorMessages[] = "Некорректная запись номера телефона <br>";
         $errors = TRUE;
     }
 } else {
-    echo '<font color="red">"Укажите номер телефона."</font>';
+    $errorMessages[] = "Укажите номер телефона.<br>";
     $errors = TRUE;
 }
 
 if (isset($_POST['user-email'])) {
     $email = $_POST['user-email'];
-    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "Email is valid";
-    } else {
-        echo '<font color="red">"Email is not valid"</font>';
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errorMessages[] = "Некорректная запись email <br>";
         $errors = TRUE;
     }
 } else {
-    echo '<font color="red">"Укажите email."</font>';
+    $errorMessages[] = "Укажите email.<br>";
     $errors = TRUE;
 }
 
 if (isset($_POST['data'])) {
     $dataBir = $_POST['data'];
     $data = DateTime::createFromFormat('Y-m-d', $dataBir);
-    if ($data && $data->format('Y-m-d') === $dataBir) {
-        echo "Date is valid";
-    } else {
-        echo '<font color="red">"Date is not valid"</font>';
+    if ($data==false || $data->format('Y-m-d') !== $dataBir) {
+        $errorMessages[] = "Некорректная запись даты<br>";
         $errors = TRUE;
     }
 } else {
-    echo '<font color="red">"Дата не выбрана."</font>';
+    $errorMessages[] = "Дата не выбрана.<br>";
     $errors = TRUE;
 }
 
 if (isset($_POST['gender'])) {
     $gender = $_POST['gender'];
-    if ($gender === 'male' || $gender === 'female') {
-        echo "Корректный выбор пола.";
-    } else {
-        echo '<font color="red">"Некорректный выбор пола."</font>';
+    if ($gender !== 'male' || $gender !== 'female') {
+        $errorMessages[] = "Некорректный выбор пола.<br>";
         $errors = TRUE;
     }
 } else {
-    echo '<font color="red">"Пол не выбран."</font>';
+    $errorMessages[] = "Пол не выбран.<br>";
     $errors = TRUE;
 }
 
 if (!isset($_POST['languages']) || empty($_POST['languages'])) {
-    echo "Вы не выбрали ни одного языка программирования.<br>";
+    $errorMessages[] = "Вы не выбрали ни одного языка программирования.<br>";
     $errors = TRUE;
 }
 
 if (isset($_POST['biograf'])) {
     $biog = trim($_POST['biograf']);
-    if (!empty($biog)) {
-        echo "Поле биографии заполнено";
-    } else {
-        echo '<span style="color: red;">Поле биография не заполнено.</span>';
+    if (empty($biog)) {
+        $errorMessages[] = "Поле биография не заполнено.<br>";
         $errors = TRUE;
     }
 } else {
-    echo '<span style="color: red;">Поле биография не передано.</span>';
+    $errorMessages[] = "Поле биография не передано.<br>";
     $errors = TRUE;
 }
 
 if (isset($_POST['agree']) && $_POST['agree'] === 'yes') {
     $sogl = ($_POST['agree']) ? 1 : 0; 
-    echo "С контрактом ознакомлен(а)";
-} else {
-    echo 'Подтвердите ознакомление с контрактом.';
+}else {
+    $errorMessages[] = "Подтвердите ознакомление с контрактом.<br>";
     $errors = TRUE;
 }
 
 if ($errors) {
-  exit();
+    foreach ($errorMessages as $message) {
+        echo '<font color="red">' . $message . '</font>';
+    }
+    exit();
 }
 
-$user = 'u68770'; 
+
 $pass = '4643907'; 
+$user = 'u68770';
 $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
   [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]); 
 
-  try {
+try {
     $stmt = $db->prepare("INSERT INTO form (name_fio, phone, email,date_r, gender, biograf,contract_accepted ) VALUES (?, ?, ?, ?, ?, ?,?)");
     $stmt->execute([$user_name, $user_phone, $email, $dataBir, $gender, $biog,$sogl]);
 
@@ -124,9 +117,9 @@ $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
             $stmt->execute([$form_id, $language_id]);
         }
     }
-
-    echo 'Данные успешно сохранены.';
-} catch (PDOException $e) {
+    header('Location: script.php?save=1');
+    exit();
+}catch (PDOException $e) {
     echo 'Ошибка: ' . $e->getMessage();
     exit();
 }
