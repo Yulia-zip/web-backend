@@ -44,7 +44,6 @@ if (isset($_GET['auth'])) {
 }
 
 if (isset($_GET['edit']) && isset($_SESSION['user_id'])) {
-		ob_start(); 
     $form_id = $_SESSION['user_id'];
     
     $stmt = $db->prepare("SELECT * FROM form WHERE id = ?");
@@ -66,15 +65,14 @@ if (isset($_GET['edit']) && isset($_SESSION['user_id'])) {
         'languages' => $languages
     ];
     
-    foreach ($oldValues as $key => $value) {
-        if ($key !== 'agree') {
-            setcookie('persistent_'.$key, is_array($value) ? json_encode($value) : $value, 
-                    time() + 60*60*24*365, '/');
-        }
-    }
+    // foreach ($oldValues as $key => $value) {
+    //     if ($key !== 'agree') {
+    //         setcookie('persistent_'.$key, is_array($value) ? json_encode($value) : $value, 
+    //                 time() + 60*60*24*365, '/');
+    //     }
+    // }
     
     include('form.php');
-		ob_end_flush(); 
     exit();
 }
 
