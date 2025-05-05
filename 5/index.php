@@ -65,12 +65,8 @@ if (isset($_GET['edit']) && isset($_SESSION['user_id'])) {
         'languages' => $languages
     ];
     
-    // foreach ($oldValues as $key => $value) {
-    //     if ($key !== 'agree') {
-    //         setcookie('persistent_'.$key, is_array($value) ? json_encode($value) : $value, 
-    //                 time() + 60*60*24*365, '/');
-    //     }
-    // }
+    $_SESSION['form_data'] = array_merge($_SESSION['form_data'] ?? [], $form_data);
+    $_SESSION['form_data']['languages'] = $languages;
     
     include('form.php');
     exit();
