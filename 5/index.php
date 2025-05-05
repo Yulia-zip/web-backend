@@ -170,13 +170,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 			
 			$db->commit();
 			
-		foreach ($_POST as $key => $value) {
-			if ($key !== 'agree') {
-					$val = is_array($value) ? json_encode($value) : $value;
-					setcookie('persistent_'.$key, $val, time() + 86400, '/');
-					$_COOKIE['persistent_'.$key] = $val;
+			$_SESSION['form_data'] = [
+				'name_fio' => $_POST['user-fio'],
+				'phone' => $_POST['user-phone'],
+				'email' => $_POST['user-email'],
+				'date_r' => $_POST['data'],
+				'gender' => $_POST['gender'],
+				'biograf' => $_POST['biograf'],
+				'contract_accepted' => ($_POST['agree'] === 'yes') ? 1 : 0,
+				'languages' => $_POST['languages'] ?? []
+		];
+			
+			foreach ($_POST as $key => $value) {
+				if ($key !== 'agree') {
+						$val = is_array($value) ? json_encode($value) : $value;
+						setcookie('persistent_'.$key, $val, time() + 86400, '/');
+						$_COOKIE['persistent_'.$key] = $val;
+				}
 			}
-		}
 
 		header('Location: index.php?edit=1&save=1');
 		exit();
