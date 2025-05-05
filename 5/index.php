@@ -139,8 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 	if (empty($_POST['agree']) || $_POST['agree'] !== 'yes') {
 			$errors['agree'] = 'Необходимо подтвердить ознакомление с контрактом';
 	}
-error_log("Attempting to update form ID: $form_id");
-error_log("POST data: " . print_r($_POST, true));
+
 	if (empty($errors)) {	
     try {
 			$db->beginTransaction();
@@ -167,48 +166,42 @@ error_log("POST data: " . print_r($_POST, true));
 					':id' => $form_id
 			]);
 			
-			$affected = $stmt->rowCount();
-			error_log("Form update affected rows: $affected");
-			
-			if ($affected === 0) {
-					throw new PDOException("No rows were updated in form table");
-			}
-			
-			// 2. Обновляем языки
-			$db->prepare("DELETE FROM lang_check WHERE check_id = :id")
-				 ->execute([':id' => $form_id]);
-			
+			$db->prepare("DELETE FROM lang_check WHERE check_id = :id")->execute([':id' => $form_id]);
 			if (!empty($_POST['languages'])) {
 					$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (:id, :lang)");
 					foreach ($_POST['languages'] as $lang_id) {
-							$stmt->execute([':id' => $form_id, ':lang' => $lang_id]);
+						$stmt->execute([':id' => $form_id, ':lang' => $lang_id]);
 					}
-					error_log("Inserted ".count($_POST['languages'])." languages");
 			}
 			
 			$db->commit();
 			
-			// Обновляем куки
-			foreach ($_POST as $key => $value) {
-					if ($key !== 'agree') {
-							$val = is_array($value) ? json_encode($value) : $value;
-							setcookie('persistent_'.$key, $val, time() + 86400, '/');
-							$_COOKIE['persistent_'.$key] = $val;
-					}
+		foreach ($_POST as $key => $value) {
+			if ($key !== 'agree') {
+					$val = is_array($value) ? json_encode($value) : $value;
+					setcookie('persistent_'.$key, $val, time() + 86400, '/');
+					$_COOKIE['persistent_'.$key] = $val;
 			}
-			
-			header('Location: index.php?edit=1&save=1');
-			exit();
-			
-	} catch (PDOException $e) {
-			$db->rollBack();
-			error_log("UPDATE ERROR: ".$e->getMessage());
-			$_SESSION['error'] = "Ошибка сохранения: ".$e->getMessage();
-			header('Location: index.php?edit=1');
-			exit();
-	}
-	}
+		}
+
+		header('Location: index.php?edit=1&save=1');
+		exit();
+
+		} catch (PDOException $e) {
+		$db->rollBack();
+		error_log("UPDATE ERROR: ".$e->getMessage());
+		$_SESSION['error'] = "Ошибка сохранения: ".$e->getMessage();
+		header('Location: index.php?edit=1');
+		exit();
+		}
+		} else {
+		setcookie('form_errors', json_encode($errors), 0, '/');
+		setcookie('old_values', json_encode($oldValues), 0, '/');
+		header('Location: index.php?edit=1');
+		exit();
+		}
 }
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $errors = [];
