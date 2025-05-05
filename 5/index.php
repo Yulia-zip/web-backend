@@ -7,13 +7,6 @@ $user = 'u68770';
 $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
     [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
-$db->exec("CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    form_id INT NOT NULL,
-    login VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    FOREIGN KEY (form_id) REFERENCES form(id) ON DELETE CASCADE
-)");
 
 if (isset($_GET['logout'])) {
     session_destroy();
