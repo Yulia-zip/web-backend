@@ -26,7 +26,6 @@
 		font-size: 30px;
 	}
 
-	/* Добавлено: стиль для кнопки выхода */
 	.logout-btn {
 		position: absolute;
 		top: 10px;
@@ -42,6 +41,28 @@
 </head>
 
 <body>
+	<?php
+    if (isset($_SESSION['user_id'])) {
+        $stmt = $db->prepare("SELECT * FROM form WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $formData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($formData) {
+            setcookie('persistent_user-fio', $formData['name_fio'], time()+3600, '/');
+            setcookie('persistent_user-phone', $formData['phone'], time()+3600, '/');
+            setcookie('persistent_user-email', $formData['email'], time()+3600, '/');
+            setcookie('persistent_data', $formData['date_r'], time()+3600, '/');
+            setcookie('persistent_gender', $formData['gender'], time()+3600, '/');
+            setcookie('persistent_biograf', $formData['biograf'], time()+3600, '/');
+            
+            $stmt = $db->prepare("SELECT language_id FROM lang_check WHERE check_id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $languages = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            setcookie('persistent_languages', json_encode($languages), time()+3600, '/');
+        }
+    }
+    ?>
+
 	<?php if (isset($_SESSION['user_id'])): ?>
 	<a href="index.php?logout=1" class="logout-btn">Выйти</a>
 	<?php endif; ?>

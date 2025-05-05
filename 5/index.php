@@ -25,7 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login']) && isset($_PO
     if ($user && password_verify($password, $user['password_hash'])) {
         $_SESSION['user_id'] = $user['form_id'];
         $_SESSION['login'] = $user['login'];
+				$_SESSION['form_id'] = $user['form_id']; 
+				$_SESSION['form_data'] = $user;
         header('Location: index.php?edit=1');
+				
         exit();
     } else {
         $errors['auth'] = 'Неверный логин или пароль';
