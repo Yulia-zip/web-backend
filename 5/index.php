@@ -134,77 +134,74 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 			$errors['agree'] = 'Необходимо подтвердить ознакомление с контрактом';
 	}
 
-	if (empty($errors)) {	
-    try {
-			$db->beginTransaction();
-			
-			// 1. Обновляем основную форму
-			$stmt = $db->prepare("UPDATE form SET 
-					name_fio = :fio, 
-					phone = :phone, 
-					email = :email, 
-					date_r = :date_r, 
-					gender = :gender, 
-					biograf = :biograf, 
-					contract_accepted = :agree 
-					WHERE id = :id");
-			
-			$stmt->execute([
-					':fio' => $_POST['user-fio'],
-					':phone' => $_POST['user-phone'],
-					':email' => $_POST['user-email'],
-					':date_r' => $_POST['data'],
-					':gender' => $_POST['gender'],
-					':biograf' => $_POST['biograf'],
-					':agree' => ($_POST['agree'] === 'yes') ? 1 : 0,
-					':id' => $form_id
-			]);
-			
-			$db->prepare("DELETE FROM lang_check WHERE check_id = :id")->execute([':id' => $form_id]);
-			if (!empty($_POST['languages'])) {
-					$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (:id, :lang)");
-					foreach ($_POST['languages'] as $lang_id) {
-						$stmt->execute([':id' => $form_id, ':lang' => $lang_id]);
-					}
-			}
-			
-			$db->commit();
-			
-			$_SESSION['form_data'] = [
-				'name_fio' => $_POST['user-fio'],
-				'phone' => $_POST['user-phone'],
-				'email' => $_POST['user-email'],
-				'date_r' => $_POST['data'],
-				'gender' => $_POST['gender'],
-				'biograf' => $_POST['biograf'],
-				'contract_accepted' => ($_POST['agree'] === 'yes') ? 1 : 0,
-				'languages' => $_POST['languages'] ?? []
-		];
-			
-			foreach ($_POST as $key => $value) {
-				if ($key !== 'agree') {
-						$val = is_array($value) ? json_encode($value) : $value;
-						setcookie('persistent_'.$key, $val, time() + 86400, '/');
-						$_COOKIE['persistent_'.$key] = $val;
+	if (empty($errors)) {    
+		try {
+				$db->beginTransaction();
+				
+				// 1. Обновляем основную форму
+				$stmt = $db->prepare("UPDATE form SET 
+								name_fio = :fio, 
+								phone = :phone, 
+								email = :email, 
+								date_r = :date_r, 
+								gender = :gender, 
+								biograf = :biograf, 
+								contract_accepted = :agree 
+								WHERE id = :id");
+				
+				$stmt->execute([
+								':fio' => $_POST['user-fio'],
+								':phone' => $_POST['user-phone'],
+								':email' => $_POST['user-email'],
+								':date_r' => $_POST['data'],
+								':gender' => $_POST['gender'],
+								':biograf' => $_POST['biograf'],
+								':agree' => ($_POST['agree'] === 'yes') ? 1 : 0,
+								':id' => $form_id
+				]);
+				
+				// 2. Обновляем языки
+				$db->prepare("DELETE FROM lang_check WHERE check_id = :id")
+						 ->execute([':id' => $form_id]);
+				
+				if (!empty($_POST['languages'])) {
+						$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (:id, :lang)");
+						foreach ($_POST['languages'] as $lang_id) {
+								$stmt->execute([':id' => $form_id, ':lang' => $lang_id]);
+						}
 				}
-			}
-
-		header('Location: index.php?edit=1&save=1');
-		exit();
-
+				
+				$db->commit();
+				
+				// Критически важный блок - обновляем сессию и куки
+				$_SESSION['form_data'] = [
+						'name_fio' => $_POST['user-fio'],
+						'phone' => $_POST['user-phone'],
+						'email' => $_POST['user-email'],
+						'date_r' => $_POST['data'],
+						'gender' => $_POST['gender'],
+						'biograf' => $_POST['biograf'],
+						'contract_accepted' => ($_POST['agree'] === 'yes') ? 1 : 0,
+						'languages' => $_POST['languages'] ?? []
+				];
+				
+				// Перенаправляем с подтверждением
+				header('Location: index.php?edit=1&success=1');
+				exit();
+				
 		} catch (PDOException $e) {
-		$db->rollBack();
-		error_log("UPDATE ERROR: ".$e->getMessage());
-		$_SESSION['error'] = "Ошибка сохранения: ".$e->getMessage();
+				$db->rollBack();
+				$_SESSION['error'] = "Ошибка сохранения: ".$e->getMessage();
+				header('Location: index.php?edit=1');
+				exit();
+		}
+} else {
+		// Если есть ошибки валидации
+		$_SESSION['form_errors'] = $errors;
+		$_SESSION['old_values'] = $_POST;
 		header('Location: index.php?edit=1');
 		exit();
-		}
-		} else {
-		setcookie('form_errors', json_encode($errors), 0, '/');
-		setcookie('old_values', json_encode($oldValues), 0, '/');
-		header('Location: index.php?edit=1');
-		exit();
-		}
+}
 }
 
 
