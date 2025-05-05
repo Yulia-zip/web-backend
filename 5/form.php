@@ -81,10 +81,18 @@
 			}
 	}
 	?>
+	<?php if (isset($_SESSION['error'])): ?>
+	<div style="color: red; padding: 10px; margin: 10px; border: 1px solid red;">
+		<?= htmlspecialchars($_SESSION['error']) ?>
+	</div>
+	<?php 
+	unset($_SESSION['error']);
+	endif; ?>
 
 	<?php if (isset($_SESSION['user_id'])): ?>
 	<a href="index.php?logout=1" class="logout-btn">Выйти</a>
 	<?php endif; ?>
+
 
 	<form class="decor" action="index.php<?= isset($_SESSION['user_id']) ? '?edit=1' : '' ?>" method="POST">
 		<div class="form-left-decoration"></div>
