@@ -139,29 +139,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 	if (empty($_POST['agree']) || $_POST['agree'] !== 'yes') {
 			$errors['agree'] = 'Необходимо подтвердить ознакомление с контрактом';
 	}
+	
 		if (empty($errors)) {
 			try {
 					$db->beginTransaction();
 					
-					$stmt = $db->prepare("UPDATE form SET name_fio=?, phone=?, email=?, date_r=?, 
-															gender=?, biograf=?, contract_accepted=? WHERE id=?");
+					$stmt = $db->prepare("UPDATE form SET 
+							name_fio = :fio, 
+							phone = :phone, 
+							email = :email, 
+							date_r = :date_r, 
+							gender = :gender, 
+							biograf = :biograf, 
+							contract_accepted = :agree 
+							WHERE id = :id");
+					
 					$stmt->execute([
-							$_POST['user-fio'],
-							$_POST['user-phone'],
-							$_POST['user-email'],
-							$_POST['data'],
-							$_POST['gender'],
-							$_POST['biograf'],
-							($_POST['agree'] === 'yes') ? 1 : 0,
-							$form_id
+							':fio' => $_POST['user-fio'],
+							':phone' => $_POST['user-phone'],
+							':email' => $_POST['user-email'],
+							':date_r' => $_POST['data'],
+							':gender' => $_POST['gender'],
+							':biograf' => $_POST['biograf'],
+							':agree' => ($_POST['agree'] === 'yes') ? 1 : 0,
+							':id' => $form_id
 					]);
 					
-					$db->prepare("DELETE FROM lang_check WHERE check_id = ?")->execute([$form_id]);
+					$db->prepare("DELETE FROM lang_check WHERE check_id = :id")
+						->execute([':id' => $form_id]);
 					
 					if (!empty($_POST['languages'])) {
-							$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (?, ?)");
+							$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (:id, :lang)");
 							foreach ($_POST['languages'] as $lang_id) {
-									$stmt->execute([$form_id, $lang_id]);
+									$stmt->execute([':id' => $form_id, ':lang' => $lang_id]);
 							}
 					}
 					
@@ -170,7 +180,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 					foreach ($_POST as $key => $value) {
 							if ($key !== 'agree') {
 									setcookie('persistent_'.$key, is_array($value) ? json_encode($value) : $value, 
-													time() + 3600, '/');
+													time() + 86400, '/');
+									$_COOKIE['persistent_'.$key] = is_array($value) ? json_encode($value) : $value;
 							}
 					}
 					
@@ -179,8 +190,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 					
 			} catch (PDOException $e) {
 					$db->rollBack();
-					$errors['database'] = 'Ошибка сохранения: ' . $e->getMessage();
-					setcookie('form_errors', json_encode($errors), 0, '/');
+					error_log("DB Error: " . $e->getMessage());
+					$_SESSION['error'] = 'Ошибка сохранения данных';
 					header('Location: index.php?edit=1');
 					exit();
 			}
@@ -190,8 +201,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 			header('Location: index.php?edit=1');
 			exit();
 	}
-
-
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
