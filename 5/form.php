@@ -42,47 +42,45 @@
 
 <body>
 	<?php
-session_start();
+	$pass = '4643907'; 
+	$user = 'u68770';
+	$db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass, [
+			PDO::ATTR_PERSISTENT => true,
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+	]);
 
-$pass = '4643907'; 
-$user = 'u68770';
-$db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass, [
-    PDO::ATTR_PERSISTENT => true,
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-]);
-
-if (isset($_SESSION['user_id'])) {
-    try {
-        $stmt = $db->prepare("SELECT * FROM form WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
-        $formData = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($formData) {
-            setcookie('persistent_user-fio', $formData['name_fio'], time()+3600, '/');
-            setcookie('persistent_user-phone', $formData['phone'], time()+3600, '/');
-            setcookie('persistent_user-email', $formData['email'], time()+3600, '/');
-            setcookie('persistent_data', $formData['date_r'], time()+3600, '/');
-            setcookie('persistent_gender', $formData['gender'], time()+3600, '/');
-            setcookie('persistent_biograf', $formData['biograf'], time()+3600, '/');
-            
-            $stmt = $db->prepare("SELECT language_id FROM lang_check WHERE check_id = ?");
-            $stmt->execute([$_SESSION['user_id']]);
-            $languages = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            setcookie('persistent_languages', json_encode($languages), time()+3600, '/');
-            
-            $_COOKIE['persistent_user-fio'] = $formData['name_fio'];
-            $_COOKIE['persistent_user-phone'] = $formData['phone'];
-            $_COOKIE['persistent_user-email'] = $formData['email'];
-            $_COOKIE['persistent_data'] = $formData['date_r'];
-            $_COOKIE['persistent_gender'] = $formData['gender'];
-            $_COOKIE['persistent_biograf'] = $formData['biograf'];
-            $_COOKIE['persistent_languages'] = json_encode($languages);
-        }
-    } catch (PDOException $e) {
-        error_log("Ошибка загрузки данных формы: " . $e->getMessage());
-    }
-}
-?>
+	if (isset($_SESSION['user_id'])) {
+			try {
+					$stmt = $db->prepare("SELECT * FROM form WHERE id = ?");
+					$stmt->execute([$_SESSION['user_id']]);
+					$formData = $stmt->fetch(PDO::FETCH_ASSOC);
+					
+					if ($formData) {
+							setcookie('persistent_user-fio', $formData['name_fio'], time()+3600, '/');
+							setcookie('persistent_user-phone', $formData['phone'], time()+3600, '/');
+							setcookie('persistent_user-email', $formData['email'], time()+3600, '/');
+							setcookie('persistent_data', $formData['date_r'], time()+3600, '/');
+							setcookie('persistent_gender', $formData['gender'], time()+3600, '/');
+							setcookie('persistent_biograf', $formData['biograf'], time()+3600, '/');
+							
+							$stmt = $db->prepare("SELECT language_id FROM lang_check WHERE check_id = ?");
+							$stmt->execute([$_SESSION['user_id']]);
+							$languages = $stmt->fetchAll(PDO::FETCH_COLUMN);
+							setcookie('persistent_languages', json_encode($languages), time()+3600, '/');
+							
+							$_COOKIE['persistent_user-fio'] = $formData['name_fio'];
+							$_COOKIE['persistent_user-phone'] = $formData['phone'];
+							$_COOKIE['persistent_user-email'] = $formData['email'];
+							$_COOKIE['persistent_data'] = $formData['date_r'];
+							$_COOKIE['persistent_gender'] = $formData['gender'];
+							$_COOKIE['persistent_biograf'] = $formData['biograf'];
+							$_COOKIE['persistent_languages'] = json_encode($languages);
+					}
+			} catch (PDOException $e) {
+					error_log("Ошибка загрузки данных формы: " . $e->getMessage());
+			}
+	}
+	?>
 
 	<?php if (isset($_SESSION['user_id'])): ?>
 	<a href="index.php?logout=1" class="logout-btn">Выйти</a>
