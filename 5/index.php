@@ -140,67 +140,76 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 			$errors['agree'] = 'Необходимо подтвердить ознакомление с контрактом';
 	}
 	
-		if (empty($errors)) {
-			try {
-					$db->beginTransaction();
-					
-					$stmt = $db->prepare("UPDATE form SET 
-							name_fio = :fio, 
-							phone = :phone, 
-							email = :email, 
-							date_r = :date_r, 
-							gender = :gender, 
-							biograf = :biograf, 
-							contract_accepted = :agree 
-							WHERE id = :id");
-					
-					$stmt->execute([
-							':fio' => $_POST['user-fio'],
-							':phone' => $_POST['user-phone'],
-							':email' => $_POST['user-email'],
-							':date_r' => $_POST['data'],
-							':gender' => $_POST['gender'],
-							':biograf' => $_POST['biograf'],
-							':agree' => ($_POST['agree'] === 'yes') ? 1 : 0,
-							':id' => $form_id
-					]);
-					
-					$db->prepare("DELETE FROM lang_check WHERE check_id = :id")
-						->execute([':id' => $form_id]);
-					
-					if (!empty($_POST['languages'])) {
-							$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (:id, :lang)");
-							foreach ($_POST['languages'] as $lang_id) {
-									$stmt->execute([':id' => $form_id, ':lang' => $lang_id]);
-							}
-					}
-					
-					$db->commit();
-					
-					foreach ($_POST as $key => $value) {
-							if ($key !== 'agree') {
-									setcookie('persistent_'.$key, is_array($value) ? json_encode($value) : $value, 
-													time() + 86400, '/');
-									$_COOKIE['persistent_'.$key] = is_array($value) ? json_encode($value) : $value;
-							}
-					}
-					
-					header('Location: index.php?edit=1&save=1');
-					exit();
-					
-			} catch (PDOException $e) {
-					$db->rollBack();
-					error_log("DB Error: " . $e->getMessage());
-					$_SESSION['error'] = 'Ошибка сохранения данных';
-					header('Location: index.php?edit=1');
-					exit();
-			}
-	} else {
-			setcookie('form_errors', json_encode($errors), 0, '/');
-			setcookie('old_values', json_encode($oldValues), 0, '/');
-			header('Location: index.php?edit=1');
-			exit();
-	}
+	if (empty($errors)) {
+		try {
+				$db->beginTransaction();
+				
+				// 1. Обновляем основную форму
+				$stmt = $db->prepare("UPDATE form SET 
+						name_fio = :fio, 
+						phone = :phone, 
+						email = :email, 
+						date_r = :date_r, 
+						gender = :gender, 
+						biograf = :biograf, 
+						contract_accepted = :agree 
+						WHERE id = :id");
+				
+				$stmt->execute([
+						':fio' => $_POST['user-fio'],
+						':phone' => $_POST['user-phone'],
+						':email' => $_POST['user-email'],
+						':date_r' => $_POST['data'],
+						':gender' => $_POST['gender'],
+						':biograf' => $_POST['biograf'],
+						':agree' => ($_POST['agree'] === 'yes') ? 1 : 0,
+						':id' => $form_id
+				]);
+				
+				// Проверка, что запрос выполнился
+				if ($stmt->rowCount() === 0) {
+						throw new PDOException("No rows affected in form update");
+				}
+				
+				// 2. Удаляем старые языки
+				$db->prepare("DELETE FROM lang_check WHERE check_id = :id")
+					 ->execute([':id' => $form_id]);
+				
+				// 3. Добавляем новые языки
+				if (!empty($_POST['languages'])) {
+						$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (:id, :lang)");
+						foreach ($_POST['languages'] as $lang_id) {
+								$stmt->execute([':id' => $form_id, ':lang' => $lang_id]);
+						}
+				}
+				
+				$db->commit();
+				
+				// Обновляем куки и сразу $_COOKIE
+				foreach ($_POST as $key => $value) {
+						if ($key !== 'agree') {
+								$cookieValue = is_array($value) ? json_encode($value) : $value;
+								setcookie('persistent_'.$key, $cookieValue, time() + 86400, '/');
+								$_COOKIE['persistent_'.$key] = $cookieValue;
+						}
+				}
+				
+				header('Location: index.php?edit=1&save=1');
+				exit();
+				
+		} catch (PDOException $e) {
+				$db->rollBack();
+				error_log("DB Error: ".$e->getMessage());
+				$_SESSION['error'] = 'Ошибка сохранения: '.$e->getMessage();
+				header('Location: index.php?edit=1');
+				exit();
+		}
+} else {
+		setcookie('form_errors', json_encode($errors), 0, '/');
+		setcookie('old_values', json_encode($oldValues), 0, '/');
+		header('Location: index.php?edit=1');
+		exit();
+}
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
