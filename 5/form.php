@@ -42,12 +42,11 @@
 
 <body>
 	<?php
-	$pass = '4643907'; 
-	$user = 'web_bek';
-	$db = new PDO('mysql:host=localhost;dbname=mydd', $user, $pass, [
-			PDO::ATTR_PERSISTENT => true,
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-	]);
+$pass = '4643907'; 
+$user = 'u68770';
+$db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
+    [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+
 
 	if (isset($_SESSION['user_id'])) {
 			try {

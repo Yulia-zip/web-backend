@@ -3,8 +3,8 @@ header('Content-Type: text/html; charset=UTF-8');
 session_start();
 
 $pass = '4643907'; 
-$user = 'web_bek';
-$db = new PDO('mysql:host=localhost;dbname=mydd', $user, $pass,
+$user = 'u68770';
+$db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
     [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 // Выход из системы
