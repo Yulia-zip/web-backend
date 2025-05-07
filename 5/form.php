@@ -43,8 +43,8 @@
 <body>
 	<?php
 	$pass = '4643907'; 
-	$user = 'u68770';
-	$db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass, [
+	$user = 'web_bek';
+	$db = new PDO('mysql:host=localhost;dbname=mydd', $user, $pass, [
 			PDO::ATTR_PERSISTENT => true,
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 	]);
@@ -88,9 +88,22 @@
 	<?php if (isset($_SESSION['user_id'])): ?>
 	<a href="index.php?logout=1" class="logout-btn">Выйти</a>
 	<?php endif; ?>
+	<?php if (isset($_SESSION['success_message'])): ?>
+	<div class="success-message"><?= $_SESSION['success_message'] ?></div>
+	<?php unset($_SESSION['success_message']); ?>
+	<?php endif; ?>
+
+	<?php if (isset($_SESSION['error'])): ?>
+	<div class="error-message"><?= $_SESSION['error'] ?></div>
+	<?php unset($_SESSION['error']); ?>
+	<?php endif; ?>
 
 
-	<form class="decor" action="index.php<?= isset($_SESSION['user_id']) ? '?edit=1' : '' ?>" method="POST">
+	<form class="decor" action="index.php" method="POST" enctype="multipart/form-data">
+
+		<?php if (isset($_SESSION['user_id'])): ?>
+		<input type="hidden" name="edit_mode" value="1">
+		<?php endif; ?>
 		<div class="form-left-decoration"></div>
 		<div class="form-right-decoration"></div>
 		<div class="circle"></div>
@@ -184,6 +197,7 @@
 				<option value="9" <?= in_array(9, $selectedLangs) ? 'selected' : '' ?>>Clojure</option>
 				<option value="10" <?= in_array(10, $selectedLangs) ? 'selected' : '' ?>>Prolog</option>
 				<option value="11" <?= in_array(11, $selectedLangs) ? 'selected' : '' ?>>Scala</option>
+				<option value="12" <?= in_array(12, $selectedLangs) ? 'selected' : '' ?>>Go</option>
 			</select>
 			<?php if (isset($errors['languages'])): ?>
 			<div class="error-message"><?= $errors['languages'] ?></div>
