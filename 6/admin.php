@@ -12,24 +12,22 @@ $user = 'u68770';
 $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
     [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
-// 🔹 Проверка HTTP Basic Auth
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
-    header('WWW-Authenticate: Basic realm="Admin Panel"');
-    header('HTTP/1.0 401 Unauthorized');
-    die('Требуется авторизация');
+			header('WWW-Authenticate: Basic realm="Admin Panel"');
+			header('HTTP/1.0 401 Unauthorized');
+			die('Авторизация отменена');
 }
-
-$stmt = $db->prepare("SELECT * FROM admins WHERE login = ?");
+	
+$stmt = $db->prepare("SELECT password_hash FROM admins WHERE login = ?");
 $stmt->execute([$_SERVER['PHP_AUTH_USER']]);
 $admin = $stmt->fetch();
 
 if (!$admin || !password_verify($_SERVER['PHP_AUTH_PW'], $admin['password_hash'])) {
-    header('WWW-Authenticate: Basic realm="Admin Panel"');
-    header('HTTP/1.0 401 Unauthorized');
-    die('Неверные учетные данные');
+		header('WWW-Authenticate: Basic realm="Admin Panel"');
+		header('HTTP/1.0 401 Unauthorized');
+		die('Неверные учетные данные');
 }
 
-// 🔹 Обработка действий (удаление, редактирование)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['delete'])) {
         $form_id = $_POST['form_id'];
