@@ -286,5 +286,3 @@ function validateFormData($data) {
 
     return $errors;
 }
-error_log("Обновляем форму ID: $form_id");
-error_log("Данные: " . print_r($_POST, true));
