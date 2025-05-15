@@ -29,7 +29,7 @@
 	.logout-btn {
 		position: absolute;
 		top: 10px;
-		right: -10px;
+		right: 10px;
 		padding: 5px 10px;
 		background: #f44336;
 		color: white;
@@ -37,34 +37,21 @@
 		border-radius: 3px;
 		cursor: pointer;
 	}
-
-	.admin-btn {
-		position: absolute;
-		top: -40px;
-		right: -80px;
-		padding: 5px 10px;
-		background: rgb(0, 0, 0);
-		color: white;
-		border: none;
-		border-radius: 3px;
-		text-decoration: none;
-		cursor: pointer;
-	}
 	</style>
 </head>
 
 <body>
 	<?php
+// $pass = '4643907'; 
+// $user = 'web_bek';
+// $db = new PDO('mysql:host=localhost;dbname=mydd', $user, $pass, [
+//     PDO::ATTR_PERSISTENT => true, 
+//     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+// ]);
 $pass = '4643907'; 
 $user = 'u68770';
 $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
     [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-
-		// $pass = '4643907'; 
-		// $user = 'web_bek';
-		// $db = new PDO('mysql:host=localhost;dbname=mydd', $user, $pass,
-    // [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-
 
 
 	if (isset($_SESSION['user_id'])) {
@@ -115,7 +102,11 @@ $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
 	<div class="error-message"><?= $_SESSION['error'] ?></div>
 	<?php unset($_SESSION['error']); ?>
 	<?php endif; ?>
-
+	<?php if (!isset($_SESSION['user_id'])): ?>
+	<a href="admin.php?rand=<?= time() ?>" class="admin-login-btn"
+		style="position: absolute; top: 10px; right: 10px; padding: 5px 10px; background: #4CAF50; color: white; text-decoration: none; border-radius: 3px;">Вход
+		для администратора</a>
+	<?php endif; ?>
 
 	<form class="decor" action="index.php" method="POST" enctype="multipart/form-data">
 
@@ -245,7 +236,6 @@ $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
 
 			<button type="submit" class="submit">Сохранить</button>
 	</form>
-	<a href="admin.php" class="admin-btn" ">Панель админа</a>
 </body>
 
 </html>

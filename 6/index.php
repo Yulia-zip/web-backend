@@ -2,15 +2,16 @@
 header('Content-Type: text/html; charset=UTF-8');
 session_start();
 
+// $pass = '4643907'; 
+// $user = 'web_bek';
+// $db = new PDO('mysql:host=localhost;dbname=mydd', $user, $pass, [
+//     PDO::ATTR_PERSISTENT => true, 
+//     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+// ]);
 $pass = '4643907'; 
 $user = 'u68770';
 $db = new PDO('mysql:host=localhost;dbname=u68770', $user, $pass,
     [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-
-// $pass = '4643907'; 
-// $user = 'web_bek';
-// $db = new PDO('mysql:host=localhost;dbname=mydd', $user, $pass,
-//     [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 if (isset($_GET['logout'])) {
     session_destroy();
@@ -18,7 +19,6 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
-// Обработка входа
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login']) && isset($_POST['password'])) {
     $login = $_POST['login'];
     $password = $_POST['password'];
@@ -50,14 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login']) && isset($_PO
     }
 }
 
-// Показ формы входа
 if (isset($_GET['auth'])) {
     $login = $_GET['login'] ?? '';
     include('login_form.php');
     exit();
 }
 
-// Редактирование существующей формы
 if (isset($_GET['edit']) && isset($_SESSION['user_id'])) {
     $form_id = $_SESSION['user_id'];
     
@@ -125,7 +123,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 									$form_id
 							]);
 							
-							// 2. Обновляем языки (сначала удаляем старые)
 							$db->prepare("DELETE FROM lang_check WHERE check_id = ?")
 								 ->execute([$form_id]);
 							
@@ -138,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 							
 							$db->commit();
 							
-							// Обновляем данные в сессии
 							$_SESSION['form_data'] = [
 									'name_fio' => $_POST['user-fio'],
 									'phone' => $_POST['user-phone'],
@@ -166,7 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 				try {
 					$db->beginTransaction();
 					
-					// Создание основной формы
 					$stmt = $db->prepare("INSERT INTO form 
 															(name_fio, phone, email, date_r, gender, biograf, contract_accepted) 
 															VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -182,7 +177,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 					
 					$form_id = $db->lastInsertId();
 					
-					// Добавление языков
 					if (isset($_POST['languages'])) {
 							foreach ($_POST['languages'] as $language_id) {
 									$stmt = $db->prepare("INSERT INTO lang_check (check_id, language_id) VALUES (?, ?)");
@@ -190,7 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 							}
 					}
 					
-					// Создание учетной записи
 					$login = uniqid('user_');
 					$password = bin2hex(random_bytes(4));
 					$password_hash = password_hash($password, PASSWORD_DEFAULT);
