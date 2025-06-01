@@ -303,10 +303,10 @@ tbody tr:nth-child(n+6) {
 					<td><?= isset($app['agreement']) && $app['agreement'] ? 'Да' : 'Нет' ?></td>
 					<td class="buttons">
 						<div class="change_button">
-							<a href="/backend-s0188267.github.io/project/modules/edit.php?id=<?= $app['id'] ?>">Редактировать</a>
+							<a href="/web-backend/8/project/modules/edit.php?id=<?= $app['id'] ?>">Редактировать</a>
 						</div>
 						<button class="delete_button"
-							onclick="if(confirm('Удалить эту заявку?')) location.href='/backend-s0188267.github.io/project/modules/delete.php?id=<?= $app['id'] ?>'">Удалить</button>
+							onclick="if(confirm('Удалить эту заявку?')) location.href='/web-backend/8/project/modules/delete.php?id=<?= $app['id'] ?>'">Удалить</button>
 					</td>
 				</tr>
 				<?php endforeach; ?>
