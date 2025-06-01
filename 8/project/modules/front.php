@@ -179,18 +179,24 @@ if ($login) {
         $app_id = $row['application_id'];
         $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
 
-        db_query("UPDATE applications SET 
-    (full_name, phone, email, birth_date, gender, biography, agreement) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([
-            $values['fio'],
-            $values['phone'],
-            $values['email'],
-            $birth_date,
-            $values['gender'],
-            $values['biography'],
-            $values['agreement']
-        ]);
+db_query("UPDATE applications SET 
+    full_name = ?, 
+    phone = ?, 
+    email = ?, 
+    birth_date = ?, 
+    gender = ?, 
+    biography = ?, 
+    agreement = ? 
+    WHERE id = ?", 
+    $values['fio'],
+    $values['phone'],
+    $values['email'],
+    $birth_date,
+    $values['gender'],
+    $values['biography'],
+    $values['agreement'],
+    $app_id
+);
 
         db_query("DELETE FROM application_languages WHERE application_id = ?", $app_id);
 
