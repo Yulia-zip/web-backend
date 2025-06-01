@@ -212,7 +212,7 @@ db_query("UPDATE applications SET
             setcookie('save', 1, time() + 3600, '/');
         }
 
-        return ['success' => true, 'login' => $login];
+echo json_encode(['success' => true, 'login' => $login]);
     }
 }
 
@@ -260,12 +260,12 @@ try {
         setcookie('password', $password, time() + 3600, '/');
     }
 
-    return ['success' => true, 'login' => $login, 'password' => $password];
+     echo json_encode(['success' => true, 'login' => $login, 'password' => $password]);
 
 } catch (PDOException $e) {
     $db->rollBack();
     error_log('DB Error: ' . $e->getMessage());
-    return ['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']];
+     echo json_encode(['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']]);
 }
 
     // try {
