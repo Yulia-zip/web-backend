@@ -166,42 +166,26 @@ function front_post($request) {
         ]);
     }
     $login = $_SESSION['login'] ?? null;
-
 if ($login) {
-    $stmt = $db->prepare("
-        SELECT ua.application_id 
-        FROM form_users u
-        JOIN user_applications ua ON u.id = ua.user_id
-        WHERE u.login = ?
-    ");
+    $stmt = $db->prepare("SELECT ua.application_id FROM form_users u JOIN user_applications ua ON u.id = ua.user_id WHERE u.login = ?");
     $stmt->execute([$login]);
-
+    
     if ($row = $stmt->fetch()) {
-        // Обновляем заявку
+        // Обновление существующей записи
         $app_id = $row['application_id'];
         $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
 
-db_query("UPDATE applications SET 
-    full_name = ?, 
-    phone = ?, 
-    email = ?, 
-    birth_date = ?, 
-    gender = ?, 
-    biography = ?, 
-    agreement = ? 
-    WHERE id = ?", 
-    $values['fio'],
-    $values['phone'],
-    $values['email'],
-    $birth_date,
-    $values['gender'],
-    $values['biography'],
-    $values['agreement'],
-    $app_id
-);
+        // Обновляем основную таблицу
+        db_query("UPDATE applications SET 
+            full_name = ?, phone = ?, email = ?, birth_date = ?,
+            gender = ?, biography = ?, agreement = ? 
+            WHERE id = ?", 
+            $values['fio'], $values['phone'], $values['email'], $birth_date,
+            $values['gender'], $values['biography'], $values['agreement'], $app_id
+        );
 
+        // Обновляем языки
         db_query("DELETE FROM application_languages WHERE application_id = ?", $app_id);
-
         foreach ($values['languages'] as $lang_id) {
             db_query("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)", $app_id, $lang_id);
         }
@@ -212,8 +196,12 @@ db_query("UPDATE applications SET
             setcookie('save', 1, time() + 3600, '/');
         }
 
-    echo json_encode(['success' => true, 'login' => $login]);
-    exit;
+        echo json_encode(['success' => true, 'login' => $login]);
+        exit;
+    } else {
+        // Если запись не найдена - создаем новую
+        echo json_encode(['success' => false, 'errors' => ['db' => 'Запись не найдена, создаем новую']]);
+        exit;
     }
 }
 
