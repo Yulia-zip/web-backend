@@ -163,15 +163,25 @@ function front_post($request) {
             'scroll_to_first_error' => $first_error_field
         ];
     }
+    $login = $_SESSION['login'] ?? null;
 
-    try {
-        $db->beginTransaction();
+if ($login) {
+    $stmt = $db->prepare("
+        SELECT ua.application_id 
+        FROM form_users u
+        JOIN user_applications ua ON u.id = ua.user_id
+        WHERE u.login = ?
+    ");
+    $stmt->execute([$login]);
 
+    if ($row = $stmt->fetch()) {
+        // Обновляем заявку
+        $app_id = $row['application_id'];
         $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
 
-        $stmt = $db->prepare("INSERT INTO applications 
-            (full_name, phone, email, birth_date, gender, biography, agreement) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)");
+        db_query("UPDATE applications SET 
+    (full_name, phone, email, birth_date, gender, biography, agreement) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $values['fio'],
             $values['phone'],
@@ -181,39 +191,125 @@ function front_post($request) {
             $values['biography'],
             $values['agreement']
         ]);
-        $app_id = $db->lastInsertId();
 
-        $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
+        db_query("DELETE FROM application_languages WHERE application_id = ?", $app_id);
+
         foreach ($values['languages'] as $lang_id) {
-            $stmt->execute([$app_id, $lang_id]);
+            db_query("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)", $app_id, $lang_id);
         }
-
-        $login = 'user_' . bin2hex(random_bytes(3));
-        $password = bin2hex(random_bytes(4));
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-
-        $stmt = $db->prepare("INSERT INTO form_users (login, password_hash) VALUES (?, ?)");
-        $stmt->execute([$login, $hash]);
-
-        $user_id = $db->lastInsertId();
-        $stmt = $db->prepare("INSERT INTO user_applications (user_id, application_id) VALUES (?, ?)");
-        $stmt->execute([$user_id, $app_id]);
 
         $db->commit();
 
         if (!$is_ajax) {
             setcookie('save', 1, time() + 3600, '/');
-            setcookie('login', $login, time() + 3600, '/');
-            setcookie('password', $password, time() + 3600, '/');
         }
 
-        return ['success' => true, 'login' => $login, 'password' => $password];
-
-    } catch (PDOException $e) {
-        $db->rollBack();
-        error_log('DB Error: ' . $e->getMessage());
-        return ['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']];
+        return ['success' => true, 'login' => $login];
     }
+}
+
+// Если заявки нет — создаём новую
+try {
+    $db->beginTransaction();
+
+    $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
+
+    $stmt = $db->prepare("INSERT INTO applications 
+        (full_name, phone, email, birth_date, gender, biography, agreement) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $values['fio'],
+        $values['phone'],
+        $values['email'],
+        $birth_date,
+        $values['gender'],
+        $values['biography'],
+        $values['agreement']
+    ]);
+    $app_id = $db->lastInsertId();
+
+    $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
+    foreach ($values['languages'] as $lang_id) {
+        $stmt->execute([$app_id, $lang_id]);
+    }
+
+    $login = 'user_' . bin2hex(random_bytes(3));
+    $password = bin2hex(random_bytes(4));
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $db->prepare("INSERT INTO form_users (login, password_hash) VALUES (?, ?)");
+    $stmt->execute([$login, $hash]);
+    $user_id = $db->lastInsertId();
+
+    $stmt = $db->prepare("INSERT INTO user_applications (user_id, application_id) VALUES (?, ?)");
+    $stmt->execute([$user_id, $app_id]);
+
+    $db->commit();
+
+    if (!$is_ajax) {
+        setcookie('save', 1, time() + 3600, '/');
+        setcookie('login', $login, time() + 3600, '/');
+        setcookie('password', $password, time() + 3600, '/');
+    }
+
+    return ['success' => true, 'login' => $login, 'password' => $password];
+
+} catch (PDOException $e) {
+    $db->rollBack();
+    error_log('DB Error: ' . $e->getMessage());
+    return ['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']];
+}
+
+    // try {
+    //     $db->beginTransaction();
+
+    //     $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
+
+    //     $stmt = $db->prepare("INSERT INTO applications 
+    //         (full_name, phone, email, birth_date, gender, biography, agreement) 
+    //         VALUES (?, ?, ?, ?, ?, ?, ?)");
+    //     $stmt->execute([
+    //         $values['fio'],
+    //         $values['phone'],
+    //         $values['email'],
+    //         $birth_date,
+    //         $values['gender'],
+    //         $values['biography'],
+    //         $values['agreement']
+    //     ]);
+    //     $app_id = $db->lastInsertId();
+
+    //     $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
+    //     foreach ($values['languages'] as $lang_id) {
+    //         $stmt->execute([$app_id, $lang_id]);
+    //     }
+
+    //     $login = 'user_' . bin2hex(random_bytes(3));
+    //     $password = bin2hex(random_bytes(4));
+    //     $hash = password_hash($password, PASSWORD_DEFAULT);
+
+    //     $stmt = $db->prepare("INSERT INTO form_users (login, password_hash) VALUES (?, ?)");
+    //     $stmt->execute([$login, $hash]);
+
+    //     $user_id = $db->lastInsertId();
+    //     $stmt = $db->prepare("INSERT INTO user_applications (user_id, application_id) VALUES (?, ?)");
+    //     $stmt->execute([$user_id, $app_id]);
+
+    //     $db->commit();
+
+    //     if (!$is_ajax) {
+    //         setcookie('save', 1, time() + 3600, '/');
+    //         setcookie('login', $login, time() + 3600, '/');
+    //         setcookie('password', $password, time() + 3600, '/');
+    //     }
+
+    //     return ['success' => true, 'login' => $login, 'password' => $password];
+
+    // } catch (PDOException $e) {
+    //     $db->rollBack();
+    //     error_log('DB Error: ' . $e->getMessage());
+    //     return ['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']];
+    // }
 }
 
 function getErrorMessage($field, $code) {
