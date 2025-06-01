@@ -213,6 +213,7 @@ db_query("UPDATE applications SET
         }
 
     echo json_encode(['success' => true, 'login' => $login]);
+    exit;
     }
 }
 
@@ -261,12 +262,14 @@ try {
     }
 
      echo json_encode(['success' => true, 'login' => $login, 'password' => $password]);
+     exit;
 
 } catch (PDOException $e) {
     $db->rollBack();
     error_log('DB Error: ' . $e->getMessage());
      echo json_encode(['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']]);
-}
+     exit;
+    }
 }
 
 function getErrorMessage($field, $code) {
