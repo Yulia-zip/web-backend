@@ -1,5 +1,4 @@
 <?php
-header('Content-Type: application/json');
 require_once __DIR__ . '/../scripts/db.php';
 
 function front_get($request) {
@@ -82,6 +81,8 @@ function front_get($request) {
 }
 
 function front_post($request) {
+    header('Content-Type: application/json');
+
     $db = db_connect();
     if (!$db) {
         return ['success' => false, 'errors' => ['db' => 'Ошибка подключения к БД']];
