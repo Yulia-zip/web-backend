@@ -85,7 +85,7 @@ function front_post($request) {
 
     $db = db_connect();
     if (!$db) {
-        return ['success' => false, 'errors' => ['db' => 'Ошибка подключения к БД']];
+         echo json_encode( ['success' => false, 'errors' => ['db' => 'Ошибка подключения к БД']]);
     }
 
     $is_ajax = $request['is_ajax'] ?? false;
@@ -159,11 +159,11 @@ function front_post($request) {
 
         $first_error_field = array_key_first($errors);
 
-        return [
+         echo json_encode( [
             'success' => false,
             'errors' => $errors,
             'scroll_to_first_error' => $first_error_field
-        ];
+        ]);
     }
     $login = $_SESSION['login'] ?? null;
 
@@ -212,7 +212,7 @@ db_query("UPDATE applications SET
             setcookie('save', 1, time() + 3600, '/');
         }
 
-echo json_encode(['success' => true, 'login' => $login]);
+    echo json_encode(['success' => true, 'login' => $login]);
     }
 }
 
@@ -267,57 +267,6 @@ try {
     error_log('DB Error: ' . $e->getMessage());
      echo json_encode(['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']]);
 }
-
-    // try {
-    //     $db->beginTransaction();
-
-    //     $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
-
-    //     $stmt = $db->prepare("INSERT INTO applications 
-    //         (full_name, phone, email, birth_date, gender, biography, agreement) 
-    //         VALUES (?, ?, ?, ?, ?, ?, ?)");
-    //     $stmt->execute([
-    //         $values['fio'],
-    //         $values['phone'],
-    //         $values['email'],
-    //         $birth_date,
-    //         $values['gender'],
-    //         $values['biography'],
-    //         $values['agreement']
-    //     ]);
-    //     $app_id = $db->lastInsertId();
-
-    //     $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
-    //     foreach ($values['languages'] as $lang_id) {
-    //         $stmt->execute([$app_id, $lang_id]);
-    //     }
-
-    //     $login = 'user_' . bin2hex(random_bytes(3));
-    //     $password = bin2hex(random_bytes(4));
-    //     $hash = password_hash($password, PASSWORD_DEFAULT);
-
-    //     $stmt = $db->prepare("INSERT INTO form_users (login, password_hash) VALUES (?, ?)");
-    //     $stmt->execute([$login, $hash]);
-
-    //     $user_id = $db->lastInsertId();
-    //     $stmt = $db->prepare("INSERT INTO user_applications (user_id, application_id) VALUES (?, ?)");
-    //     $stmt->execute([$user_id, $app_id]);
-
-    //     $db->commit();
-
-    //     if (!$is_ajax) {
-    //         setcookie('save', 1, time() + 3600, '/');
-    //         setcookie('login', $login, time() + 3600, '/');
-    //         setcookie('password', $password, time() + 3600, '/');
-    //     }
-
-    //     return ['success' => true, 'login' => $login, 'password' => $password];
-
-    // } catch (PDOException $e) {
-    //     $db->rollBack();
-    //     error_log('DB Error: ' . $e->getMessage());
-    //     return ['success' => false, 'errors' => ['db' => 'Ошибка при сохранении в БД']];
-    // }
 }
 
 function getErrorMessage($field, $code) {
@@ -336,3 +285,4 @@ function getErrorMessage($field, $code) {
 
     return $messages[$field] ?? 'Ошибка в поле';
 }
+?>
