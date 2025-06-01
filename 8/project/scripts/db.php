@@ -7,12 +7,13 @@ function db_connect() {
     global $db;
     if ($db !== null) return $db;
 
-    // $user = 'u68609';
-    // $pass = '1793514';
-    // $dsn = 'mysql:host=localhost;dbname=u68609;charset=utf8mb4';
+
+    // $pass = '4643907'; 
+    // $user = 'web_bek';
+    // $dsn = 'mysql:host=localhost;dbname=mydd;charset=utf8mb4';
     $pass = '4643907'; 
-    $user = 'web_bek';
-    $dsn = 'mysql:host=localhost;dbname=mydd;charset=utf8mb4';
+    $user = 'u68770';
+    $dsn = 'mysql:host=localhost;dbname=u68770;charset=utf8mb4';
 
     try {
         $db = new PDO($dsn, $user, $pass, [
