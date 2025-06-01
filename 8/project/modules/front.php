@@ -171,8 +171,8 @@ if ($login) {
     $stmt->execute([$login]);
     
     if ($row = $stmt->fetch()) {
-        // Обновление существующей записи
-        $app_id = $row['application_id'];
+        $db->beginTransaction();
+         $app_id = $row['application_id'];
         $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
 
         // Обновляем основную таблицу
