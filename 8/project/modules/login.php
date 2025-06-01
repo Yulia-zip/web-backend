@@ -42,7 +42,7 @@ function login_post($request) {
         }
 
         // Проверяем среди пользователей
-        $stmt = $db->prepare("SELECT * FROM users WHERE login = ?");
+        $stmt = $db->prepare("SELECT * FROM form_users WHERE login = ?");
         $stmt->execute([$login]);
 
         if ($user = $stmt->fetch()) {

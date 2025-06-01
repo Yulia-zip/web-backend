@@ -25,7 +25,7 @@ function admin_get() {
     foreach ($applications as $app) {
         // Логин пользователя
         $stmt = $db->prepare("
-            SELECT u.login FROM users u
+            SELECT u.login FROM form_users u
             JOIN user_applications ua ON u.id = ua.user_id
             WHERE ua.application_id = ?
         ");

@@ -16,7 +16,7 @@ function front_get($request) {
         $db = db_connect();
         $stmt = $db->prepare("
             SELECT a.*, GROUP_CONCAT(al.language_id) as languages
-            FROM users u
+            FROM form_users u
             JOIN user_applications ua ON ua.user_id = u.id
             JOIN applications a ON a.id = ua.application_id
             LEFT JOIN application_languages al ON al.application_id = a.id
@@ -192,7 +192,7 @@ function front_post($request) {
         $password = bin2hex(random_bytes(4));
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $db->prepare("INSERT INTO users (login, password_hash) VALUES (?, ?)");
+        $stmt = $db->prepare("INSERT INTO form_users (login, password_hash) VALUES (?, ?)");
         $stmt->execute([$login, $hash]);
 
         $user_id = $db->lastInsertId();
