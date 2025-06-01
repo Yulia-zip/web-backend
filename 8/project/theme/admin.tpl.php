@@ -247,7 +247,7 @@ tbody tr:nth-child(n+6) {
 <body>
 	<div class="admin-container">
 		<h1>Админ-панель</h1>
-		<a href="/backend-s0188267.github.io/project/modules/logout.php" class="button admin-logout">Выйти</a>
+		<a href=" /web-backend/8/project/modules/logout.php" class="button admin-logout">Выйти</a>
 
 		<div class="stats">
 			<h2>Статистика по языкам программирования</h2>
